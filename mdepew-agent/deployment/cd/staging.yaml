@@ -144,6 +144,10 @@ steps:
 substitutions:
   _STAGING_PROJECT_ID: YOUR_STAGING_PROJECT_ID
   _REGION: us-central1
+  _ARTIFACT_REGISTRY_REPO_NAME: mdepew-agent
+  _CONTAINER_NAME: mdepew-agent
+  _BUCKET_NAME_LOAD_TEST_RESULTS: mdepew-agent-load-test-results
+  _CLOUD_RUN_APP_SA_EMAIL: mdepew-agent-sa@mdepew-assets.iam.gserviceaccount.com
 
 logsBucket: gs://${PROJECT_ID}-mdepew-agent-logs-data/build-logs
 options:

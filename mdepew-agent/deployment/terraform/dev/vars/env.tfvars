@@ -6,3 +6,4 @@ dev_project_id = "mdepew-assets"
 
 # The Google Cloud region you will use to deploy the infrastructure
 region = "us-central1"
+
