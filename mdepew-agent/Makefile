@@ -34,7 +34,11 @@ ui:
 
 setup-dev-env:
 	PROJECT_ID=$$(gcloud config get-value project) && \
-	(cd deployment/terraform/dev && terraform init && terraform apply --var-file vars/env.tfvars --var dev_project_id=$$PROJECT_ID --auto-approve)
+	(cd deployment/terraform && terraform init && terraform apply --var-file=vars/env.tfvars --auto-approve)
+
+terraform-destroy:
+	PROJECT_ID=$$(gcloud config get-value project) && \
+	(cd deployment/terraform && terraform destroy --var-file=vars/env.tfvars --auto-approve)
 
 lint:
 	uv run codespell

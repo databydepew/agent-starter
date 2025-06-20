@@ -1,29 +1,16 @@
-# Copyright 2025 Google LLC
-#
-# Licensed under the Apache License, Version 2.0 (the "License");
-# you may not use this file except in compliance with the License.
-# You may obtain a copy of the License at
-#
-#     http://www.apache.org/licenses/LICENSE-2.0
-#
-# Unless required by applicable law or agreed to in writing, software
-# distributed under the License is distributed on an "AS IS" BASIS,
-# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-# See the License for the specific language governing permissions and
-# limitations under the License.
-
 # a. Create PR checks trigger
 resource "google_cloudbuild_trigger" "pr_checks" {
   name            = "pr-${var.project_name}"
-  project         = var.cicd_runner_project_id
-  location        = var.region
+  project         = var.project_id
   description     = "Trigger for PR checks"
   service_account = resource.google_service_account.cicd_runner_sa.id
 
-  repository_event_config {
-    repository = "projects/${var.cicd_runner_project_id}/locations/${var.region}/connections/${var.host_connection_name}/repositories/${var.repository_name}"
+  github {
+    owner = "databydepew"
+    name  = "agent-starter"
     pull_request {
-      branch = "main"
+      branch = "^main$"
+      comment_control = "COMMENTS_ENABLED"
     }
   }
 
@@ -34,7 +21,6 @@ resource "google_cloudbuild_trigger" "pr_checks" {
     "tests/**",
     "deployment/**",
     "uv.lock",
-  
   ]
   include_build_logs = "INCLUDE_BUILD_LOGS_WITH_STATUS"
   depends_on = [resource.google_project_service.cicd_services, resource.google_project_service.shared_services]
@@ -43,15 +29,15 @@ resource "google_cloudbuild_trigger" "pr_checks" {
 # b. Create CD pipeline trigger
 resource "google_cloudbuild_trigger" "cd_pipeline" {
   name            = "cd-${var.project_name}"
-  project         = var.cicd_runner_project_id
-  location        = var.region
+  project         = var.project_id
   service_account = resource.google_service_account.cicd_runner_sa.id
   description     = "Trigger for CD pipeline"
 
-  repository_event_config {
-    repository = "projects/${var.cicd_runner_project_id}/locations/${var.region}/connections/${var.host_connection_name}/repositories/${var.repository_name}"
+  github {
+    owner = "databydepew"
+    name  = "agent-starter"
     push {
-      branch = "main"
+      branch = "^main$"
     }
   }
 
@@ -65,30 +51,32 @@ resource "google_cloudbuild_trigger" "cd_pipeline" {
   ]
   include_build_logs = "INCLUDE_BUILD_LOGS_WITH_STATUS"
   substitutions = {
-    _STAGING_PROJECT_ID            = var.staging_project_id
+    _PROJECT_ID                    = var.project_id
     _BUCKET_NAME_LOAD_TEST_RESULTS = resource.google_storage_bucket.bucket_load_test_results.name
     _REGION                        = var.region
 
     _CONTAINER_NAME                = var.project_name
     _ARTIFACT_REGISTRY_REPO_NAME   = resource.google_artifact_registry_repository.repo-artifacts-genai.repository_id
-    _CLOUD_RUN_APP_SA_EMAIL         = resource.google_service_account.cloud_run_app_sa["staging"].email
-
+    _CLOUD_RUN_APP_SA_EMAIL        = resource.google_service_account.cloud_run_app_sa["main"].email
 
     # Your other CD Pipeline substitutions
   }
   depends_on = [resource.google_project_service.cicd_services, resource.google_project_service.shared_services]
-
 }
 
 # c. Create Deploy to production trigger
 resource "google_cloudbuild_trigger" "deploy_to_prod_pipeline" {
   name            = "deploy-${var.project_name}"
-  project         = var.cicd_runner_project_id
-  location        = var.region
+  project         = var.project_id
   description     = "Trigger for deployment to production"
   service_account = resource.google_service_account.cicd_runner_sa.id
-  repository_event_config {
-    repository = "projects/${var.cicd_runner_project_id}/locations/${var.region}/connections/${var.host_connection_name}/repositories/${var.repository_name}"
+  
+  github {
+    owner = "databydepew"
+    name  = "agent-starter"
+    push {
+      tag = "v.*"
+    }
   }
   filename = "deployment/cd/deploy-to-prod.yaml"
   include_build_logs = "INCLUDE_BUILD_LOGS_WITH_STATUS"
@@ -96,16 +84,12 @@ resource "google_cloudbuild_trigger" "deploy_to_prod_pipeline" {
     approval_required = true
   }
   substitutions = {
-    _PROD_PROJECT_ID             = var.prod_project_id
+    _PROJECT_ID                  = var.project_id
     _REGION                      = var.region
 
     _CONTAINER_NAME              = var.project_name
     _ARTIFACT_REGISTRY_REPO_NAME = resource.google_artifact_registry_repository.repo-artifacts-genai.repository_id
-    _CLOUD_RUN_APP_SA_EMAIL       = resource.google_service_account.cloud_run_app_sa["prod"].email
-
-
-    # Your other Deploy to Prod Pipeline substitutions
+    _CLOUD_RUN_APP_SA_EMAIL      = resource.google_service_account.cloud_run_app_sa["main"].email
   }
   depends_on = [resource.google_project_service.cicd_services, resource.google_project_service.shared_services]
-
 }

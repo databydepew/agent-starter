@@ -36,14 +36,11 @@ locals {
   ]
 
   deploy_project_ids = {
-    prod    = var.prod_project_id
-    staging = var.staging_project_id
+    main = var.project_id
   }
 
   all_project_ids = [
-    var.cicd_runner_project_id,
-    var.prod_project_id,
-    var.staging_project_id
+    var.project_id
   ]
 
 }

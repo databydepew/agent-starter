@@ -18,19 +18,9 @@ variable "project_name" {
   default     = "mdepew-agent"
 }
 
-variable "prod_project_id" {
+variable "project_id" {
   type        = string
-  description = "**Production** Google Cloud Project ID for resource deployment."
-}
-
-variable "staging_project_id" {
-  type        = string
-  description = "**Staging** Google Cloud Project ID for resource deployment."
-}
-
-variable "cicd_runner_project_id" {
-  type        = string
-  description = "Google Cloud Project ID where CI/CD pipelines will execute."
+  description = "Google Cloud Project ID for resource deployment and CI/CD execution."
 }
 
 variable "region" {
@@ -92,7 +82,7 @@ variable "cicd_roles" {
 }
 
 variable "cicd_sa_deployment_required_roles" {
-  description = "List of roles to assign to the CICD runner service account for the Staging and Prod projects."
+  description = "List of roles to assign to the CICD runner service account for the project."
   type        = list(string)
   default = [
     "roles/run.developer",    

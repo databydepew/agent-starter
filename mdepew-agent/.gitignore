@@ -141,9 +141,23 @@ dmypy.json
 # PyCharm
 .idea
 
-# User-specific files
-.terraform*
-.Terraform*
+# Terraform files
+.terraform/
+.terraform.lock.hcl
+terraform.tfstate
+terraform.tfstate.backup
+terraform.tfstate.*
+*.tfstate
+*.tfstate.*
+crash.log
+crash.*.log
+.terraformrc
+terraform.rc
+.terraform.d/
+override.tf
+override.tf.json
+*_override.tf
+*_override.tf.json
 
 
 tmp*
