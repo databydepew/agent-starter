@@ -21,7 +21,6 @@ backend:
 		--memory "4Gi" \
 		--project $$PROJECT_ID \
 		--region "us-central1" \
-		--no-allow-unauthenticated \
 		--labels "created-by=adk" \
 		--set-env-vars \
 		"COMMIT_SHA=$(shell git rev-parse HEAD)"
